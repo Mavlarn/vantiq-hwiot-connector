@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 public class ReconnectHandler extends Handler<ExtensionServiceMessage> {
 
-    static final Logger LOG = LoggerFactory.getLogger(PublishHandler.class);
+    static final Logger LOG = LoggerFactory.getLogger(ReconnectHandler.class);
 
     private HWIOTConnector extension;
 

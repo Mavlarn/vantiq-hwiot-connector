@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigHandler extends Handler<ExtensionServiceMessage> {
@@ -34,7 +35,6 @@ public class ConfigHandler extends Handler<ExtensionServiceMessage> {
     private static final String MQS_APP_ID = "mqs_user";
     private static final String MQS_APP_SEC = "mqs_password";
     private static final String TOPICS = "topics";
-
 
     private HWIOTConnector connector;
     private ObjectMapper om = new ObjectMapper();
@@ -82,6 +82,10 @@ public class ConfigHandler extends Handler<ExtensionServiceMessage> {
                 consumer.setTopic(topic);// 设置Topic Name
                 consumer.setTags("*");                  // 设置订阅消息的标签，可以指定消费某一类型的消息，默认*表示消费所有类型的消息
                 consumer.setEncryptTransport(false);// 设置是否需要加密传输
+                LOG.info("mqsServer: " + mqsServer);
+                LOG.info("mqsAppId: " + mqsAppId);
+                LOG.info("mqsAppSec: " + mqsAppSec);
+                LOG.info("topic: " + topic);
                 /*
                 consumer.subscribe(message1 -> {
                     try {
@@ -99,12 +103,29 @@ public class ConfigHandler extends Handler<ExtensionServiceMessage> {
                 */
                 consumer.subscribe(new MessageListener() {
                     public ConsumeStatus consume(Message message) {
+                        LOG.info("subscribe on consume.");
                         try {
                             String msg = new String(message.getBody(), "UTF-8");
-                            System.out.println("Receive: " + msg);
+                            LOG.info("Receive body: " + msg);
+                            System.out.println("Properties: " + message.getProperties());
+                            String deviceId = message.getProperties().get("mqttClientId").toString();
+                            System.out.println("deviceId: " + message.getProperties().get("mqttClientId").toString());
+                            String [] topicList = message.getProperties().get("mqttTopic").split("/");
+                            String nodeId = topicList[3];
+                            System.out.println("nodeId:"+topicList[3]);
+                            long eventTime = message.getBornTimestamp();
+                            System.out.println("eventTime: " + eventTime);
+
                             Map data = om.readValue(msg, Map.class);
-                            LOG.debug("result json string: {}", data);
-                            connector.getVantiqClient().sendNotification(data);
+                            LOG.info("result json string: {}", data);
+
+                            Map rtnData = new HashMap();
+                            rtnData.put("deviceId", deviceId);
+                            rtnData.put("nodeId", nodeId);
+                            //rtnData.put("eventTime", eventTime);
+                            rtnData.put("data", data);
+
+                            connector.getVantiqClient().sendNotification(rtnData);
                         } catch (Exception e) {
                             LOG.error(e.getMessage(), e);
                         }
@@ -124,3 +145,4 @@ public class ConfigHandler extends Handler<ExtensionServiceMessage> {
     }
 
 }
+

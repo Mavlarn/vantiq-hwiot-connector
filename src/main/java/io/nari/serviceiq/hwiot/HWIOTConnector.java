@@ -23,8 +23,8 @@ public class HWIOTConnector {
     static final Logger LOG = LoggerFactory.getLogger(HWIOTConnector.class);
     ExtensionWebSocketClient vantiqClient = null;
     String sourceName = null;
-    String vantiqUrl = null;
-    String vantiqToken = null;
+    public String vantiqUrl = null;
+    public String vantiqToken = null;
     String homeDir = null;
 
     List<Consumer> mqsConsumers = new ArrayList<>();
@@ -95,7 +95,7 @@ public class HWIOTConnector {
      * @param timeout   The maximum number of seconds to wait before assuming failure and stopping
      * @return          true if the connection succeeded, false if it failed to connect within {@code timeout} seconds.
      */
-    private boolean checkConnectionFails(ExtensionWebSocketClient client, int timeout) {
+    public boolean checkConnectionFails(ExtensionWebSocketClient client, int timeout) {
         boolean sourcesSucceeded = false;
         try {
             sourcesSucceeded = client.getSourceConnectionFuture().get(timeout, TimeUnit.SECONDS);

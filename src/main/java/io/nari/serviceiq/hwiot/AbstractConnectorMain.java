@@ -34,7 +34,8 @@ public class AbstractConnectorMain {
             return null;
         }
 
-        String configFileName = locDir.getAbsolutePath() + File.separator + LOCAL_CONFIG_FILE_NAME;
+        //String configFileName = locDir.getAbsolutePath() + File.separator + LOCAL_CONFIG_FILE_NAME;
+        String configFileName = "/etc/config/config.json";
         InputStream cfr = null;
         Map<String, Object> props = null;
         try {

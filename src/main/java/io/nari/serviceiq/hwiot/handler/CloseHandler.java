@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 public class CloseHandler extends Handler<ExtensionWebSocketClient> {
 
-    static final Logger LOG = LoggerFactory.getLogger(PublishHandler.class);
+    static final Logger LOG = LoggerFactory.getLogger(CloseHandler.class);
 
     private HWIOTConnector connector;
 
@@ -33,6 +33,22 @@ public class CloseHandler extends Handler<ExtensionWebSocketClient> {
             LOG.error("Error in shutting down consumer.", e);
         }
         LOG.info("Stopped consumer");
+
+        // reconnect
+        int CONNECTOR_CONNECT_TIMEOUT = 10;
+        int RECONNECT_INTERVAL = 5000;
+        boolean sourcesSucceeded = false;
+        while (!sourcesSucceeded) {
+            client.initiateFullConnection(connector.vantiqUrl, connector.vantiqToken);
+            sourcesSucceeded = connector.checkConnectionFails(client, CONNECTOR_CONNECT_TIMEOUT);
+            if (!sourcesSucceeded) {
+                try {
+                    Thread.sleep(RECONNECT_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOG.error("An error occurred when trying to sleep the current thread. Error Message: ", e);
+                }
+            }
+        }
 
     }
 }
